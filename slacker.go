@@ -56,7 +56,7 @@ func (slacker Slacker) Send(message string) error {
 		return fmt.Errorf("Slacker failed to send message: %s", err)
 	}
 
-	hash := slacker.getHash(message)
+	hash := slacker.getHash()
 	if !slacker.needToSend(hash) {
 		slacker.Log.Printf("Skip message %s: %s", hash, message)
 		return nil
@@ -161,16 +161,16 @@ func (slacker Slacker) needToSend(hash string) bool {
 	return true
 }
 
-func (slacker Slacker) getHash(subject string) (hash string) {
+func (slacker Slacker) getHash() (hash string) {
 	t := time.Now()
 
 	if slacker.Frequency == NotifyOnceHour {
-		hash = t.Format("2006-01-02-15") + ":" + slacker.MessageTag + ":" + subject
+		hash = t.Format("2006-01-02-15") + ":" + slacker.MessageTag
 		return
 	}
 
 	if slacker.Frequency == NotifyOnceDay {
-		hash = t.Format("2006-01-02") + ":" + slacker.MessageTag + ":" + subject
+		hash = t.Format("2006-01-02") + ":" + slacker.MessageTag
 		return
 	}
 
