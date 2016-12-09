@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -100,6 +101,10 @@ func (slacker *Slacker) send(message SlackMessage) (response string, err error) 
 	}
 
 	raw_response, err := slacker.httpClient.Post(slacker.Hook, "string", bytes.NewBuffer(payload))
+	if raw_response != nil {
+		defer slacker.ioClose(raw_response.Body)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -268,4 +273,11 @@ func (slacker *Slacker) setHttpClient() {
 		MaxIdleConnsPerHost:   128,
 	}
 	slacker.httpClient = &http.Client{Transport: tr}
+}
+
+func (slacker *Slacker) ioClose(c io.Closer) {
+	err := c.Close()
+	if err != nil {
+		slacker.Log.Printf("Failed to close resource: %s", err)
+	}
 }
